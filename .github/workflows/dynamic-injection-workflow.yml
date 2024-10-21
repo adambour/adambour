@@ -1,20 +1,20 @@
 name: Dynamic README injection
 on:
-  schedule: # Run workflow automatically
-    # This will make it run every hour
+  schedule:
+    # Cette tâche s'exécute automatiquement toutes les heures
     - cron: "0 * * * *"
-    # Run workflow manually (without waiting for the cron to be called), through the Github Actions Workflow page directly
   workflow_dispatch:
+
 jobs:
   get-office-quotes:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Let the magic happen
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v3
         with:
-          node-version: 14.6.0
+          node-version: '20'  # Mettez à jour avec la version que vous souhaitez utiliser
 
       - run: yarn
 
@@ -27,7 +27,8 @@ jobs:
           git add .
           git config --global user.name "adambour"
           git config --global user.email "bouradam.adam@gmail.com"
-          git commit -m "[Automated] README updated with new Office quote!"
+          git commit -m "[Automated] README updated with new Office quote!" || echo "No changes to commit"  # Ignore si aucune modification
+
       - name: Push
         uses: ad-m/github-push-action@master
         with:
