@@ -1,7 +1,6 @@
 name: Dynamic README Injection
 on:
   schedule:
-    # Exécute le workflow automatiquement toutes les heures
     - cron: "0 * * * *"
   workflow_dispatch:
 
@@ -15,7 +14,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '12'  # Utilisation de Node.js 12
+          node-version: '12'
 
       - name: Install dependencies
         run: yarn
@@ -24,16 +23,23 @@ jobs:
         run: |
           node . || { echo "Script failed with exit code $?"; exit 128; }
 
+      - name: Configure git
+        run: |
+          git config --global user.name "adambour"
+          git config --global user.email "bouradam.adam@gmail.com"
+
+      - name: Check out to the desired branch
+        run: |
+          git checkout main
+
       - name: Add changes to git
         run: |
           git config pull.rebase false
-          git pull
-          git add README.md  # Assurez-vous d'ajouter seulement le fichier que vous modifiez
-          git config --global user.name "adambour"
-          git config --global user.email "bouradam.adam@gmail.com"
+          git pull origin main
+          git add README.md
           git commit -m "[Automated] README updated with new Office quote!" || echo "No changes to commit"
 
       - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git remote set-url origin https://x-access-token:${{ secrets.MY_GITHUB_TOKEN }}@github.com/adambour/adambour.git
+          git push origin main
