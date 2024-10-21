@@ -1,7 +1,7 @@
-name: Dynamic README injection
+name: Dynamic README Injection
 on:
   schedule:
-    # Cette tâche s'exécute automatiquement toutes les heures
+    # Exécute le workflow automatiquement toutes les heures
     - cron: "0 * * * *"
   workflow_dispatch:
 
@@ -9,27 +9,31 @@ jobs:
   get-office-quotes:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      - name: Let the magic happen
+      - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20'  # Mettez à jour avec la version que vous souhaitez utiliser
+          node-version: '12'  # Utilisation de Node.js 12
 
-      - run: yarn
+      - name: Install dependencies
+        run: yarn
 
-      - run: node .
+      - name: Run the script to update README
+        run: |
+          node . || { echo "Script failed with exit code $?"; exit 128; }
 
-      - name: Add to git repo
+      - name: Add changes to git
         run: |
           git config pull.rebase false
           git pull
-          git add .
+          git add README.md  # Assurez-vous d'ajouter seulement le fichier que vous modifiez
           git config --global user.name "adambour"
           git config --global user.email "bouradam.adam@gmail.com"
-          git commit -m "[Automated] README updated with new Office quote!" || echo "No changes to commit"  # Ignore si aucune modification
+          git commit -m "[Automated] README updated with new Office quote!" || echo "No changes to commit"
 
-      - name: Push
+      - name: Push changes
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
